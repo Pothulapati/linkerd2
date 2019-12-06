@@ -8,12 +8,12 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: linkerd-prometheus-config
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: prometheus
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: prometheus
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 data:
   prometheus.yml: |-
     global:
@@ -33,7 +33,7 @@ data:
       kubernetes_sd_configs:
       - role: pod
         namespaces:
-          names: ['{{.Namespace}}']
+          names: ['{{.global.Namespace}}']
       relabel_configs:
       - source_labels:
         - __meta_kubernetes_pod_container_name
@@ -71,7 +71,7 @@ data:
       kubernetes_sd_configs:
       - role: pod
         namespaces:
-          names: ['{{.Namespace}}']
+          names: ['{{.global.Namespace}}']
       relabel_configs:
       - source_labels:
         - __meta_kubernetes_pod_label_linkerd_io_control_plane_component
@@ -91,7 +91,7 @@ data:
         - __meta_kubernetes_pod_container_port_name
         - __meta_kubernetes_pod_label_linkerd_io_control_plane_ns
         action: keep
-        regex: ^{{default .ProxyContainerName "linkerd-proxy" .ProxyContainerName}};linkerd-admin;{{.Namespace}}$
+        regex: ^{{default .ProxyContainerName "linkerd-proxy" .ProxyContainerName}};linkerd-admin;{{.global.Namespace}}$
       - source_labels: [__meta_kubernetes_namespace]
         action: replace
         target_label: namespace
@@ -124,53 +124,53 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-prometheus
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: prometheus
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: prometheus
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 spec:
   type: ClusterIP
   selector:
-    {{.ControllerComponentLabel}}: prometheus
+    {{.global.ControllerComponentLabel}}: prometheus
   ports:
   - name: admin-http
     port: 9090
     targetPort: 9090
 ---
-{{ if empty .Proxy.Image.Version -}}
-{{ $_ := set .Proxy.Image "Version" .LinkerdVersion -}}
+{{ if empty .global.Proxy.Image.Version -}}
+{{ $_ := set .global.Proxy.Image "Version" .global.LinkerdVersion -}}
 {{ end -}}
-{{ $_ := set .Proxy "WorkloadKind" "deployment" -}}
-{{ $_ := set .Proxy "Component" "linkerd-prometheus" -}}
-{{ include "linkerd.proxy.validation" .Proxy -}}
+{{ $_ := set .global.Proxy "WorkloadKind" "deployment" -}}
+{{ $_ := set .global.Proxy "Component" "linkerd-prometheus" -}}
+{{ include "linkerd.proxy.validation" .global.Proxy -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
   labels:
-    {{.ControllerComponentLabel}}: prometheus
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: prometheus
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   name: linkerd-prometheus
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      {{.ControllerComponentLabel}}: prometheus
-      {{.ControllerNamespaceLabel}}: {{.Namespace}}
-      {{- include "partials.proxy.labels" .Proxy | nindent 6}}
+      {{.global.ControllerComponentLabel}}: prometheus
+      {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+      {{- include "partials.proxy.labels" .global.Proxy | nindent 6}}
   template:
     metadata:
       annotations:
-        {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
-        {{- include "partials.proxy.annotations" .Proxy| nindent 8}}
+        {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
+        {{- include "partials.proxy.annotations" .global.Proxy| nindent 8}}
       labels:
-        {{.ControllerComponentLabel}}: prometheus
-        {{.ControllerNamespaceLabel}}: {{.Namespace}}
-        {{- include "partials.proxy.labels" .Proxy | nindent 8}}
+        {{.global.ControllerComponentLabel}}: prometheus
+        {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+        {{- include "partials.proxy.labels" .global.Proxy | nindent 8}}
     spec:
       {{- include "linkerd.node-selector" . | nindent 6 }}
       containers:
@@ -180,7 +180,7 @@ spec:
         - --config.file=/etc/prometheus/prometheus.yml
         - --log.level={{lower .PrometheusLogLevel}}
         image: {{.PrometheusImage}}
-        imagePullPolicy: {{.ImagePullPolicy}}
+        imagePullPolicy: {{.global.ImagePullPolicy}}
         livenessProbe:
           httpGet:
             path: /-/healthy

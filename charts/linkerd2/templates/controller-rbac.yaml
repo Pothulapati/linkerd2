@@ -7,10 +7,10 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-controller
+  name: linkerd-{{.global.Namespace}}-controller
   labels:
-    {{.ControllerComponentLabel}}: controller
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: controller
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 rules:
 - apiGroups: ["extensions", "apps"]
   resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
@@ -31,25 +31,25 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-controller
+  name: linkerd-{{.global.Namespace}}-controller
   labels:
-    {{.ControllerComponentLabel}}: controller
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: controller
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: linkerd-{{.Namespace}}-controller
+  name: linkerd-{{.global.Namespace}}-controller
 subjects:
 - kind: ServiceAccount
   name: linkerd-controller
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-controller
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: controller
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: controller
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 {{ end -}}

@@ -8,66 +8,66 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-controller-api
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: controller
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: controller
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 spec:
   type: ClusterIP
   selector:
-    {{.ControllerComponentLabel}}: controller
+    {{.global.ControllerComponentLabel}}: controller
   ports:
   - name: http
     port: 8085
     targetPort: 8085
 ---
-{{ $_ := set .Proxy "WorkloadKind" "deployment" -}}
-{{ $_ := set .Proxy "Component" "linkerd-controller" -}}
-{{ include "linkerd.proxy.validation" .Proxy -}}
+{{ $_ := set .global.Proxy "WorkloadKind" "deployment" -}}
+{{ $_ := set .global.Proxy "Component" "linkerd-controller" -}}
+{{ include "linkerd.proxy.validation" .global.Proxy -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
   labels:
-    {{.ControllerComponentLabel}}: controller
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: controller
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   name: linkerd-controller
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 spec:
   replicas: {{.ControllerReplicas}}
   selector:
     matchLabels:
-      {{.ControllerComponentLabel}}: controller
-      {{.ControllerNamespaceLabel}}: {{.Namespace}}
-      {{- include "partials.proxy.labels" .Proxy | nindent 6}}
+      {{.global.ControllerComponentLabel}}: controller
+      {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+      {{- include "partials.proxy.labels" .global.Proxy | nindent 6}}
   template:
     metadata:
       annotations:
-        {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
-        {{- include "partials.proxy.annotations" .Proxy| nindent 8}}
+        {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
+        {{- include "partials.proxy.annotations" .global.Proxy| nindent 8}}
       labels:
-        {{.ControllerComponentLabel}}: controller
-        {{.ControllerNamespaceLabel}}: {{.Namespace}}
-        {{- include "partials.proxy.labels" .Proxy | nindent 8}}
+        {{.global.ControllerComponentLabel}}: controller
+        {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+        {{- include "partials.proxy.labels" .global.Proxy | nindent 8}}
     spec:
       {{- include "linkerd.node-selector" . | nindent 6 }}
       {{- if .EnablePodAntiAffinity -}}
-      {{- $local := dict "Component" "controller" "Label" .ControllerComponentLabel -}}
+      {{- $local := dict "Component" "controller" "Label" .global.ControllerComponentLabel -}}
       {{- include "linkerd.pod-affinity" $local | nindent 6 -}}
       {{- end }}
       containers:
       - args:
         - public-api
-        - -prometheus-url=http://linkerd-prometheus.{{.Namespace}}.svc.{{.ClusterDomain}}:9090
-        - -destination-addr=linkerd-dst.{{.Namespace}}.svc.{{.ClusterDomain}}:8086
-        - -controller-namespace={{.Namespace}}
+        - -prometheus-url=http://linkerd-prometheus.{{.global.Namespace}}.svc.{{.global.ClusterDomain}}:9090
+        - -destination-addr=linkerd-dst.{{.global.Namespace}}.svc.{{.global.ClusterDomain}}:8086
+        - -controller-namespace={{.global.Namespace}}
         - -log-level={{.ControllerLogLevel}}
         {{- include "partials.linkerd.trace" . | nindent 8 -}}
-        image: {{.ControllerImage}}:{{default .LinkerdVersion .ControllerImageVersion}}
-        imagePullPolicy: {{.ImagePullPolicy}}
+        image: {{.ControllerImage}}:{{default .global.LinkerdVersion .ControllerImageVersion}}
+        imagePullPolicy: {{.global.ImagePullPolicy}}
         livenessProbe:
           httpGet:
             path: /ping

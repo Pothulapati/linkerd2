@@ -1,5 +1,5 @@
 {{with .Values -}}
-{{if .Identity -}}
+{{if .global.Identity -}}
 ---
 ###
 ### Identity Controller Service RBAC
@@ -8,10 +8,10 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-identity
+  name: linkerd-{{.global.Namespace}}-identity
   labels:
-    {{.ControllerComponentLabel}}: identity
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: identity
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 rules:
 - apiGroups: ["authentication.k8s.io"]
   resources: ["tokenreviews"]
@@ -26,26 +26,26 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-identity
+  name: linkerd-{{.global.Namespace}}-identity
   labels:
-    {{.ControllerComponentLabel}}: identity
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: identity
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: linkerd-{{.Namespace}}-identity
+  name: linkerd-{{.global.Namespace}}-identity
 subjects:
 - kind: ServiceAccount
   name: linkerd-identity
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-identity
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: identity
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: identity
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 {{ end -}}
 {{ end -}}

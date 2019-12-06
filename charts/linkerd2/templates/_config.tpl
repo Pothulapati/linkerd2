@@ -1,36 +1,36 @@
 {{- define "linkerd.configs.global" -}}
 {
-  "linkerdNamespace": "{{.Namespace}}",
+  "linkerdNamespace": "{{.global.Namespace}}",
   "cniEnabled": false,
-  "version": "{{.LinkerdVersion}}",
+  "version": "{{.global.LinkerdVersion}}",
   "identityContext":{
-    "trustDomain": "{{.Identity.TrustDomain}}",
-    "trustAnchorsPem": "{{required "Please provide the identity trust anchors" .Identity.TrustAnchorsPEM | trim | replace "\n" "\\n"}}",
-    "issuanceLifeTime": "{{.Identity.Issuer.IssuanceLifeTime}}",
-    "clockSkewAllowance": "{{.Identity.Issuer.ClockSkewAllowance}}",
-    "scheme": "{{.Identity.Issuer.Scheme}}"
+    "trustDomain": "{{.global.Identity.TrustDomain}}",
+    "trustAnchorsPem": "{{required "Please provide the identity trust anchors" .global.Identity.TrustAnchorsPEM | trim | replace "\n" "\\n"}}",
+    "issuanceLifeTime": "{{.global.Identity.Issuer.IssuanceLifeTime}}",
+    "clockSkewAllowance": "{{.global.Identity.Issuer.ClockSkewAllowance}}",
+    "scheme": "{{.global.Identity.Issuer.Scheme}}"
   },
   "autoInjectContext": null,
   "omitWebhookSideEffects": {{.OmitWebhookSideEffects}},
-  "clusterDomain": "{{.ClusterDomain}}"
+  "clusterDomain": "{{.global.ClusterDomain}}"
 }
 {{- end -}}
 
 {{- define "linkerd.configs.proxy" -}}
 {
   "proxyImage":{
-    "imageName":"{{.Proxy.Image.Name}}",
-    "pullPolicy":"{{.Proxy.Image.PullPolicy}}"
+    "imageName":"{{.global.Proxy.Image.Name}}",
+    "pullPolicy":"{{.global.Proxy.Image.PullPolicy}}"
   },
   "proxyInitImage":{
-    "imageName":"{{.ProxyInit.Image.Name}}",
-    "pullPolicy":"{{.ProxyInit.Image.PullPolicy}}"
+    "imageName":"{{.global.ProxyInit.Image.Name}}",
+    "pullPolicy":"{{.global.ProxyInit.Image.PullPolicy}}"
   },
   "controlPort":{
-    "port": {{.Proxy.Ports.Control}}
+    "port": {{.global.Proxy.Ports.Control}}
   },
   "ignoreInboundPorts":[
-    {{- $ports := splitList "," .ProxyInit.IgnoreInboundPorts -}}
+    {{- $ports := splitList "," .global.ProxyInit.IgnoreInboundPorts -}}
     {{- if gt (len $ports) 1}}
     {{- $last := sub (len $ports) 1 -}}
     {{- range $i,$port := $ports -}}
@@ -39,7 +39,7 @@
     {{- end -}}
   ],
   "ignoreOutboundPorts":[
-    {{- $ports := splitList "," .ProxyInit.IgnoreOutboundPorts -}}
+    {{- $ports := splitList "," .global.ProxyInit.IgnoreOutboundPorts -}}
     {{- if gt (len $ports) 1}}
     {{- $last := sub (len $ports) 1 -}}
     {{- range $i,$port := $ports -}}
@@ -48,33 +48,33 @@
     {{- end -}}
   ],
   "inboundPort":{
-    "port": {{.Proxy.Ports.Inbound}}
+    "port": {{.global.Proxy.Ports.Inbound}}
   },
   "adminPort":{
-    "port": {{.Proxy.Ports.Admin}}
+    "port": {{.global.Proxy.Ports.Admin}}
   },
   "outboundPort":{
-    "port": {{.Proxy.Ports.Outbound}}
+    "port": {{.global.Proxy.Ports.Outbound}}
   },
   "resource":{
-    "requestCpu": "{{.Proxy.Resources.CPU.Request}}",
-    "limitCpu": "{{.Proxy.Resources.CPU.Limit}}",
-    "requestMemory": "{{.Proxy.Resources.Memory.Request}}",
-    "limitMemory": "{{.Proxy.Resources.Memory.Limit}}"
+    "requestCpu": "{{.global.Proxy.Resources.CPU.Request}}",
+    "limitCpu": "{{.global.Proxy.Resources.CPU.Limit}}",
+    "requestMemory": "{{.global.Proxy.Resources.Memory.Request}}",
+    "limitMemory": "{{.global.Proxy.Resources.Memory.Limit}}"
   },
-  "proxyUid": {{.Proxy.UID}},
+  "proxyUid": {{.global.Proxy.UID}},
   "logLevel":{
-    "level": "{{.Proxy.LogLevel}}"
+    "level": "{{.global.Proxy.LogLevel}}"
   },
-  "disableExternalProfiles": {{not .Proxy.EnableExternalProfiles}},
-  "proxyVersion": "{{.Proxy.Image.Version}}",
-  "proxyInitImageVersion": "{{.ProxyInit.Image.Version}}"
+  "disableExternalProfiles": {{not .global.Proxy.EnableExternalProfiles}},
+  "proxyVersion": "{{.global.Proxy.Image.Version}}",
+  "proxyInitImageVersion": "{{.global.ProxyInit.Image.Version}}"
 }
 {{- end -}}
 
 {{- define "linkerd.configs.install" -}}
 {
-  "cliVersion":"{{ .LinkerdVersion }}",
+  "cliVersion":"{{ .global.LinkerdVersion }}",
   "flags":[]
 }
 {{- end -}}

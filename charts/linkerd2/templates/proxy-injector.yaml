@@ -4,48 +4,48 @@
 ### Proxy Injector
 ###
 ---
-{{ $_ := set .Proxy "WorkloadKind" "deployment" -}}
-{{ $_ := set .Proxy "Component" "linkerd-proxy-injector" -}}
-{{ include "linkerd.proxy.validation" .Proxy -}}
+{{ $_ := set .global.Proxy "WorkloadKind" "deployment" -}}
+{{ $_ := set .global.Proxy "Component" "linkerd-proxy-injector" -}}
+{{ include "linkerd.proxy.validation" .global.Proxy -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
   labels:
-    {{.ControllerComponentLabel}}: proxy-injector
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: proxy-injector
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   name: linkerd-proxy-injector
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 spec:
   replicas: {{.ControllerReplicas}}
   selector:
     matchLabels:
-      {{.ControllerComponentLabel}}: proxy-injector
+      {{.global.ControllerComponentLabel}}: proxy-injector
   template:
     metadata:
       annotations:
         {{- if empty .CliVersion }}
         linkerd.io/helm-release-version: {{ $.Release.Revision | quote}}
         {{- end }}
-        {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
-        {{- include "partials.proxy.annotations" .Proxy| nindent 8}}
+        {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
+        {{- include "partials.proxy.annotations" .global.Proxy| nindent 8}}
       labels:
-        {{.ControllerComponentLabel}}: proxy-injector
-        {{.ControllerNamespaceLabel}}: {{.Namespace}}
-        {{- include "partials.proxy.labels" .Proxy | nindent 8}}
+        {{.global.ControllerComponentLabel}}: proxy-injector
+        {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+        {{- include "partials.proxy.labels" .global.Proxy | nindent 8}}
     spec:
       {{- include "linkerd.node-selector" . | nindent 6 }}
       {{- if .EnablePodAntiAffinity -}}
-      {{- $local := dict "Component" "proxy-injector" "Label" .ControllerComponentLabel -}}
+      {{- $local := dict "Component" "proxy-injector" "Label" .global.ControllerComponentLabel -}}
       {{- include "linkerd.pod-affinity" $local | nindent 6 -}}
       {{- end }}
       containers:
       - args:
         - proxy-injector
         - -log-level={{.ControllerLogLevel}}
-        image: {{.ControllerImage}}:{{default .LinkerdVersion .ControllerImageVersion}}
-        imagePullPolicy: {{.ImagePullPolicy}}
+        image: {{.ControllerImage}}:{{default .global.LinkerdVersion .ControllerImageVersion}}
+        imagePullPolicy: {{.global.ImagePullPolicy}}
         livenessProbe:
           httpGet:
             path: /ping
@@ -92,16 +92,16 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-proxy-injector
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: proxy-injector
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: proxy-injector
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 spec:
   type: ClusterIP
   selector:
-    {{.ControllerComponentLabel}}: proxy-injector
+    {{.global.ControllerComponentLabel}}: proxy-injector
   ports:
   - name: proxy-injector
     port: 443

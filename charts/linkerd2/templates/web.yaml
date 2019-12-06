@@ -8,16 +8,16 @@ kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-web
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: web
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: web
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 spec:
   type: ClusterIP
   selector:
-    {{.ControllerComponentLabel}}: web
+    {{.global.ControllerComponentLabel}}: web
   ports:
   - name: http
     port: 8084
@@ -26,49 +26,49 @@ spec:
     port: 9994
     targetPort: 9994
 ---
-{{ $_ := set .Proxy "WorkloadKind" "deployment" -}}
-{{ $_ := set .Proxy "Component" "linkerd-web" -}}
-{{ include "linkerd.proxy.validation" .Proxy -}}
+{{ $_ := set .global.Proxy "WorkloadKind" "deployment" -}}
+{{ $_ := set .global.Proxy "Component" "linkerd-web" -}}
+{{ include "linkerd.proxy.validation" .global.Proxy -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
   labels:
-    {{.ControllerComponentLabel}}: web
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: web
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   name: linkerd-web
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 spec:
   replicas: {{.Dashboard.Replicas}}
   selector:
     matchLabels:
-      {{.ControllerComponentLabel}}: web
-      {{.ControllerNamespaceLabel}}: {{.Namespace}}
-      {{- include "partials.proxy.labels" .Proxy | nindent 6}}
+      {{.global.ControllerComponentLabel}}: web
+      {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+      {{- include "partials.proxy.labels" .global.Proxy | nindent 6}}
   template:
     metadata:
       annotations:
-        {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
-        {{- include "partials.proxy.annotations" .Proxy| nindent 8}}
+        {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
+        {{- include "partials.proxy.annotations" .global.Proxy| nindent 8}}
       labels:
-        {{.ControllerComponentLabel}}: web
-        {{.ControllerNamespaceLabel}}: {{.Namespace}}
-        {{- include "partials.proxy.labels" .Proxy | nindent 8}}
+        {{.global.ControllerComponentLabel}}: web
+        {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+        {{- include "partials.proxy.labels" .global.Proxy | nindent 8}}
     spec:
       {{- include "linkerd.node-selector" . | nindent 6 }}
       containers:
       - args:
-        - -api-addr=linkerd-controller-api.{{.Namespace}}.svc.{{.ClusterDomain}}:8085
-        - -grafana-addr=linkerd-grafana.{{.Namespace}}.svc.{{.ClusterDomain}}:3000
-        - -controller-namespace={{.Namespace}}
+        - -api-addr=linkerd-controller-api.{{.global.Namespace}}.svc.{{.global.ClusterDomain}}:8085
+        - -grafana-addr=linkerd-grafana.{{.global.Namespace}}.svc.{{.global.lusterDomain}}:3000
+        - -controller-namespace={{.global.Namespace}}
         - -log-level={{.ControllerLogLevel}}
-        {{- $hostFull := replace "." "\\." (printf "linkerd-web.%s.svc.%s" .Namespace .ClusterDomain) }}
-        {{- $hostAbbrev := replace "." "\\." (printf "linkerd-web.%s.svc" .Namespace) }}
+        {{- $hostFull := replace "." "\\." (printf "linkerd-web.%s.svc.%s" .global.Namespace .global.ClusterDomain) }}
+        {{- $hostAbbrev := replace "." "\\." (printf "linkerd-web.%s.svc" .global.Namespace) }}
         - -enforced-host=^(localhost|127\.0\.0\.1|{{ $hostFull }}|{{ $hostAbbrev }}|\[::1\])(:\d+)?$
         {{- include "partials.linkerd.trace" . | nindent 8 -}}
-        image: {{.WebImage}}:{{default .LinkerdVersion .ControllerImageVersion}}
-        imagePullPolicy: {{.ImagePullPolicy}}
+        image: {{.WebImage}}:{{default .global.LinkerdVersion .ControllerImageVersion}}
+        imagePullPolicy: {{.global.ImagePullPolicy}}
         livenessProbe:
           httpGet:
             path: /ping

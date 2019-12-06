@@ -7,9 +7,9 @@
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: linkerd-{{.Namespace}}-control-plane
+  name: linkerd-{{.global.Namespace}}-control-plane
   labels:
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 spec:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
@@ -63,23 +63,23 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: linkerd-psp
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 rules:
 - apiGroups: ['policy', 'extensions']
   resources: ['podsecuritypolicies']
   verbs: ['use']
   resourceNames:
-  - linkerd-{{.Namespace}}-control-plane
+  - linkerd-{{.global.Namespace}}-control-plane
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: linkerd-psp
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 roleRef:
   kind: Role
   name: linkerd-psp
@@ -87,34 +87,34 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: linkerd-controller
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 - kind: ServiceAccount
   name: linkerd-destination
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 - kind: ServiceAccount
   name: linkerd-grafana
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 {{ if not .DisableHeartBeat -}}
 - kind: ServiceAccount
   name: linkerd-heartbeat
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 {{ end -}}
 - kind: ServiceAccount
   name: linkerd-identity
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 - kind: ServiceAccount
   name: linkerd-prometheus
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 - kind: ServiceAccount
   name: linkerd-proxy-injector
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 - kind: ServiceAccount
   name: linkerd-sp-validator
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 - kind: ServiceAccount
   name: linkerd-tap
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 - kind: ServiceAccount
   name: linkerd-web
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 {{ end -}}

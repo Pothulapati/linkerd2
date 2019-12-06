@@ -10,9 +10,9 @@ kind: CustomResourceDefinition
 metadata:
   name: trafficsplits.split.smi-spec.io
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
   labels:
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 spec:
   group: split.smi-spec.io
   version: v1alpha1

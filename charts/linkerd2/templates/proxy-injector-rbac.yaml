@@ -7,10 +7,10 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-proxy-injector
+  name: linkerd-{{.global.Namespace}}-proxy-injector
   labels:
-    {{.ControllerComponentLabel}}: proxy-injector
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: proxy-injector
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 rules:
 - apiGroups: [""]
   resources: ["events"]
@@ -31,42 +31,42 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-proxy-injector
+  name: linkerd-{{.global.Namespace}}-proxy-injector
   labels:
-    {{.ControllerComponentLabel}}: proxy-injector
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: proxy-injector
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 subjects:
 - kind: ServiceAccount
   name: linkerd-proxy-injector
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   apiGroup: ""
 roleRef:
   kind: ClusterRole
-  name: linkerd-{{.Namespace}}-proxy-injector
+  name: linkerd-{{.global.Namespace}}-proxy-injector
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-proxy-injector
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: proxy-injector
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: proxy-injector
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 ---
 kind: Secret
 apiVersion: v1
 metadata:
   name: linkerd-proxy-injector-tls
-  namespace: {{ .Namespace }}
+  namespace: {{ .global.Namespace }}
   labels:
-    {{ .ControllerComponentLabel }}: proxy-injector
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel }}: proxy-injector
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 type: Opaque
 data:
-  {{ $ca := genCA (printf "linkerd-proxy-injector.%s.svc" .Namespace) 365 -}}
+  {{ $ca := genCA (printf "linkerd-proxy-injector.%s.svc" .global.Namespace) 365 -}}
   crt.pem: {{ ternary (b64enc $ca.Cert) (b64enc (trim .ProxyInjector.CrtPEM)) (empty .ProxyInjector.CrtPEM) }}
   key.pem: {{ ternary (b64enc $ca.Key) (b64enc (trim .ProxyInjector.KeyPEM)) (empty .ProxyInjector.KeyPEM) }}
 ---
@@ -75,8 +75,8 @@ kind: MutatingWebhookConfiguration
 metadata:
   name: linkerd-proxy-injector-webhook-config
   labels:
-    {{.ControllerComponentLabel}}: proxy-injector
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: proxy-injector
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 webhooks:
 - name: linkerd-proxy-injector.linkerd.io
   namespaceSelector:
@@ -88,7 +88,7 @@ webhooks:
   clientConfig:
     service:
       name: linkerd-proxy-injector
-      namespace: {{ .Namespace }}
+      namespace: {{ .global.Namespace }}
       path: "/"
     caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim .ProxyInjector.CrtPEM)) (empty .ProxyInjector.CrtPEM) }}
   failurePolicy: {{.WebhookFailurePolicy}}

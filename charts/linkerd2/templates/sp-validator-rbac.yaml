@@ -7,10 +7,10 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-sp-validator
+  name: linkerd-{{.global.Namespace}}-sp-validator
   labels:
-    {{.ControllerComponentLabel}}: sp-validator
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: sp-validator
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -19,42 +19,42 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: linkerd-{{.Namespace}}-sp-validator
+  name: linkerd-{{.global.Namespace}}-sp-validator
   labels:
-    {{.ControllerComponentLabel}}: sp-validator
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: sp-validator
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 subjects:
 - kind: ServiceAccount
   name: linkerd-sp-validator
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   apiGroup: ""
 roleRef:
   kind: ClusterRole
-  name: linkerd-{{.Namespace}}-sp-validator
+  name: linkerd-{{.global.Namespace}}-sp-validator
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
   name: linkerd-sp-validator
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: sp-validator
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: sp-validator
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 ---
 kind: Secret
 apiVersion: v1
 metadata:
   name: linkerd-sp-validator-tls
-  namespace: {{ .Namespace }}
+  namespace: {{ .global.Namespace }}
   labels:
-    {{.ControllerComponentLabel}}: sp-validator
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: sp-validator
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 type: Opaque
 data:
-  {{ $ca := genCA (printf "linkerd-sp-validator.%s.svc" .Namespace) 365 -}}
+  {{ $ca := genCA (printf "linkerd-sp-validator.%s.svc" .global.Namespace) 365 -}}
   crt.pem: {{ ternary (b64enc $ca.Cert) (b64enc (trim .ProfileValidator.CrtPEM)) (empty .ProfileValidator.CrtPEM) }}
   key.pem: {{ ternary (b64enc $ca.Key) (b64enc (trim .ProfileValidator.KeyPEM)) (empty .ProfileValidator.KeyPEM) }}
 ---
@@ -63,8 +63,8 @@ kind: ValidatingWebhookConfiguration
 metadata:
   name: linkerd-sp-validator-webhook-config
   labels:
-    {{.ControllerComponentLabel}}: sp-validator
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: sp-validator
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
 webhooks:
 - name: linkerd-sp-validator.linkerd.io
   namespaceSelector:
@@ -76,7 +76,7 @@ webhooks:
   clientConfig:
     service:
       name: linkerd-sp-validator
-      namespace: {{ .Namespace }}
+      namespace: {{ .global.Namespace }}
       path: "/"
     caBundle: {{ ternary (b64enc $ca.Cert) (b64enc (trim .ProfileValidator.CrtPEM)) (empty .ProfileValidator.CrtPEM) }}
   failurePolicy: {{.WebhookFailurePolicy}}

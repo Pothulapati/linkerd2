@@ -1,36 +1,36 @@
 {{- define "partials.proxy-init" -}}
 args:
 - --incoming-proxy-port
-- {{.Proxy.Ports.Inbound | quote}}
+- {{.global.Proxy.Ports.Inbound | quote}}
 - --outgoing-proxy-port
-- {{.Proxy.Ports.Outbound | quote}}
+- {{.global.Proxy.Ports.Outbound | quote}}
 - --proxy-uid
-- {{.Proxy.UID | quote}}
+- {{.global.Proxy.UID | quote}}
 - --inbound-ports-to-ignore
-- {{.Proxy.Ports.Control}},{{.Proxy.Ports.Admin}}{{ternary (printf ",%s" .ProxyInit.IgnoreInboundPorts) "" (not (empty .ProxyInit.IgnoreInboundPorts)) }}
-{{- if hasPrefix "linkerd-" .Proxy.Component }}
+- {{.global.Proxy.Ports.Control}},{{.global.Proxy.Ports.Admin}}{{ternary (printf ",%s" .global.ProxyInit.IgnoreInboundPorts) "" (not (empty .global.ProxyInit.IgnoreInboundPorts)) }}
+{{- if hasPrefix "linkerd-" .global.Proxy.Component }}
 - --outbound-ports-to-ignore
-- {{ternary (printf "443,%s" .ProxyInit.IgnoreOutboundPorts) (quote "443") (not (empty .ProxyInit.IgnoreOutboundPorts)) }}
-{{- else if .ProxyInit.IgnoreOutboundPorts }}
+- {{ternary (printf "443,%s" .global.ProxyInit.IgnoreOutboundPorts) (quote "443") (not (empty .global.ProxyInit.IgnoreOutboundPorts)) }}
+{{- else if .global.ProxyInit.IgnoreOutboundPorts }}
 - --outbound-ports-to-ignore
-- {{.ProxyInit.IgnoreOutboundPorts | quote}}
+- {{.global.ProxyInit.IgnoreOutboundPorts | quote}}
 {{- end }}
-image: {{.ProxyInit.Image.Name}}:{{.ProxyInit.Image.Version}}
-imagePullPolicy: {{.ProxyInit.Image.PullPolicy}}
+image: {{.global.ProxyInit.Image.Name}}:{{.global.ProxyInit.Image.Version}}
+imagePullPolicy: {{.global.ProxyInit.Image.PullPolicy}}
 name: linkerd-init
-{{ include "partials.resources" .ProxyInit.Resources }}
+{{ include "partials.resources" .global.ProxyInit.Resources }}
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     add:
     - NET_ADMIN
     - NET_RAW
-    {{- if .ProxyInit.Capabilities -}}
-    {{- if .ProxyInit.Capabilities.Add }}
-    {{- toYaml .ProxyInit.Capabilities.Add | trim | nindent 4 }}
+    {{- if .global.ProxyInit.Capabilities -}}
+    {{- if .global.ProxyInit.Capabilities.Add }}
+    {{- toYaml .global.ProxyInit.Capabilities.Add | trim | nindent 4 }}
     {{- end }}
-    {{- if .ProxyInit.Capabilities.Drop -}}
-    {{- include "partials.proxy-init.capabilities.drop" .ProxyInit | nindent 4 -}}
+    {{- if .global.ProxyInit.Capabilities.Drop -}}
+    {{- include "partials.proxy-init.capabilities.drop" .global.ProxyInit | nindent 4 -}}
     {{- end }}
     {{- end }}
   privileged: false
@@ -38,10 +38,10 @@ securityContext:
   runAsNonRoot: false
   runAsUser: 0
 terminationMessagePolicy: FallbackToLogsOnError
-{{- if .ProxyInit.SAMountPath }}
+{{- if .global.ProxyInit.SAMountPath }}
 volumeMounts:
-- mountPath: {{.ProxyInit.SAMountPath.MountPath}}
-  name: {{.ProxyInit.SAMountPath.Name}}
-  readOnly: {{.ProxyInit.SAMountPath.ReadOnly}}
+- mountPath: {{.global.ProxyInit.SAMountPath.MountPath}}
+  name: {{.global.ProxyInit.SAMountPath.Name}}
+  readOnly: {{.global.ProxyInit.SAMountPath.ReadOnly}}
 {{- end -}}
 {{- end -}}

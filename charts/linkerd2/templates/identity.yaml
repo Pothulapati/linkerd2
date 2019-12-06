@@ -1,81 +1,81 @@
 {{with .Values -}}
-{{if .Identity -}}
+{{if .global.Identity -}}
 ---
 ###
 ### Identity Controller Service
 ###
-{{ if and (.Identity.Issuer) (eq .Identity.Issuer.Scheme "linkerd.io/tls") -}}
+{{ if and (.global.Identity.Issuer) (eq .global.Identity.Issuer.Scheme "linkerd.io/tls") -}}
 ---
 kind: Secret
 apiVersion: v1
 metadata:
   name: linkerd-identity-issuer
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: identity
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: identity
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
-    {{- if .Identity.Issuer.CrtExpiryAnnotation}}
-    {{.Identity.Issuer.CrtExpiryAnnotation}}: {{required "Please provide the identity issuer certificate expiry date" .Identity.Issuer.CrtExpiry}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
+    {{- if .global.Identity.Issuer.CrtExpiryAnnotation}}
+    {{.global.Identity.Issuer.CrtExpiryAnnotation}}: {{required "Please provide the identity issuer certificate expiry date" .global.Identity.Issuer.CrtExpiry}}
     {{- end}}
 data:
-  crt.pem: {{b64enc (required "Please provide the identity issuer certificate" .Identity.Issuer.TLS.CrtPEM | trim)}}
-  key.pem: {{b64enc (required "Please provide the identity issue private key" .Identity.Issuer.TLS.KeyPEM | trim)}}
+  crt.pem: {{b64enc (required "Please provide the identity issuer certificate" .global.Identity.Issuer.TLS.CrtPEM | trim)}}
+  key.pem: {{b64enc (required "Please provide the identity issue private key" .global.Identity.Issuer.TLS.KeyPEM | trim)}}
 {{- end}}
 ---
 kind: Service
 apiVersion: v1
 metadata:
   name: linkerd-identity
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
   labels:
-    {{.ControllerComponentLabel}}: identity
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: identity
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
 spec:
   type: ClusterIP
   selector:
-    {{.ControllerComponentLabel}}: identity
+    {{.global.ControllerComponentLabel}}: identity
   ports:
   - name: grpc
     port: 8080
     targetPort: 8080
 ---
-{{ $_ := set .Proxy "WorkloadKind" "deployment" -}}
-{{ $_ := set .Proxy "Component" "linkerd-identity" -}}
-{{ include "linkerd.proxy.validation" .Proxy -}}
+{{ $_ := set .global.Proxy "WorkloadKind" "deployment" -}}
+{{ $_ := set .global.Proxy "Component" "linkerd-identity" -}}
+{{ include "linkerd.proxy.validation" .global.Proxy -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
+    {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
   labels:
-    {{.ControllerComponentLabel}}: identity
-    {{.ControllerNamespaceLabel}}: {{.Namespace}}
+    {{.global.ControllerComponentLabel}}: identity
+    {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
   name: linkerd-identity
-  namespace: {{.Namespace}}
+  namespace: {{.global.Namespace}}
 spec:
   replicas: {{.ControllerReplicas}}
   selector:
     matchLabels:
-      {{.ControllerComponentLabel}}: identity
-      {{.ControllerNamespaceLabel}}: {{.Namespace}}
-      {{- include "partials.proxy.labels" .Proxy | nindent 6}}
+      {{.global.ControllerComponentLabel}}: identity
+      {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+      {{- include "partials.proxy.labels" .global.Proxy | nindent 6}}
   template:
     metadata:
       annotations:
-        {{.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .LinkerdVersion) .CliVersion}}
-        {{- include "partials.proxy.annotations" .Proxy| nindent 8}}
+        {{.global.CreatedByAnnotation}}: {{default (printf "linkerd/helm %s" .global.LinkerdVersion) .CliVersion}}
+        {{- include "partials.proxy.annotations" .global.Proxy| nindent 8}}
       labels:
-        {{.ControllerComponentLabel}}: identity
-        {{.ControllerNamespaceLabel}}: {{.Namespace}}
-        {{- include "partials.proxy.labels" .Proxy | nindent 8}}
+        {{.global.ControllerComponentLabel}}: identity
+        {{.global.ControllerNamespaceLabel}}: {{.global.Namespace}}
+        {{- include "partials.proxy.labels" .global.Proxy | nindent 8}}
     spec:
       {{- include "linkerd.node-selector" . | nindent 6 }}
       {{- if .EnablePodAntiAffinity -}}
-      {{- $local := dict "Component" "identity" "Label" .ControllerComponentLabel -}}
+      {{- $local := dict "Component" "identity" "Label" .global.ControllerComponentLabel -}}
       {{- include "linkerd.pod-affinity" $local | nindent 6 -}}
       {{- end }}
       containers:
@@ -83,8 +83,8 @@ spec:
         - identity
         - -log-level={{.ControllerLogLevel}}
         {{- include "partials.linkerd.trace" . | nindent 8 -}}
-        image: {{.ControllerImage}}:{{default .LinkerdVersion .ControllerImageVersion}}
-        imagePullPolicy: {{.ImagePullPolicy}}
+        image: {{.ControllerImage}}:{{default .global.LinkerdVersion .ControllerImageVersion}}
+        imagePullPolicy: {{.global.ImagePullPolicy}}
         livenessProbe:
           httpGet:
             path: /ping
@@ -101,8 +101,8 @@ spec:
           httpGet:
             path: /ready
             port: 9990
-        {{- if .IdentityResources -}}
-        {{- include "partials.resources" .IdentityResources | nindent 8 }}
+        {{- if .global.IdentityResources -}}
+        {{- include "partials.resources" .global.IdentityResources | nindent 8 }}
         {{- end }}
         securityContext:
           runAsUser: {{.ControllerUID}}
