@@ -1,3 +1,0 @@
-# grafana configuration
-
-GrafanaImage: gcr.io/linkerd-io/grafana

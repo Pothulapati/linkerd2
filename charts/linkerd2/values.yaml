@@ -116,6 +116,10 @@ ControllerUID: 2103
 Dashboard:
   Replicas: 1
 
+
+# grafana configuration
+GrafanaImage: gcr.io/linkerd-io/grafana
+
 # heartbeat configuration
 DisableHeartBeat: false
 HeartbeatSchedule: "0 0 * * *"
@@ -151,3 +155,5 @@ Tap:
 # web configuration
 WebImage: gcr.io/linkerd-io/web
 
+# Control Plane Tracing
+ControlPlaneTracing: true
