@@ -52,7 +52,7 @@ global:
       Memory:
         Limit: 50Mi
         Request: 10Mi
-        
+
   # identity configuration
   Identity:
     Issuer:
@@ -78,7 +78,7 @@ global:
     TrustAnchorsPEM: |
 
     TrustDomain: *cluster_domain
-      
+
   # control plane annotations - do not edit
   CreatedByAnnotation: linkerd.io/created-by
 
@@ -154,6 +154,3 @@ Tap:
 
 # web configuration
 WebImage: gcr.io/linkerd-io/web
-
-# Control Plane Tracing
-ControlPlaneTracing: true
