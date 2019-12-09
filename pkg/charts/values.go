@@ -19,21 +19,15 @@ type (
 	// Values contains the top-level elements in the Helm charts
 	Values struct {
 		Stage                       string
-		Namespace                   string
-		ClusterDomain               string
 		ControllerImage             string
 		ControllerImageVersion      string
 		WebImage                    string
 		PrometheusImage             string
 		GrafanaImage                string
-		ImagePullPolicy             string
 		CliVersion                  string
 		ControllerReplicas          uint
 		ControllerLogLevel          string
 		PrometheusLogLevel          string
-		ControllerComponentLabel    string
-		ControllerNamespaceLabel    string
-		CreatedByAnnotation         string
 		ProxyContainerName          string
 		ProxyInjectAnnotation       string
 		ProxyInjectDisabled         string
@@ -50,14 +44,12 @@ type (
 		HeartbeatSchedule           string
 		InstallNamespace            bool
 		ControlPlaneTracing         bool
+		Global                      *Global `json:"global"`
 		Configs                     ConfigJSONs
 		Dashboard                   *Dashboard
-		Identity                    *Identity
 		ProxyInjector               *ProxyInjector
 		ProfileValidator            *ProfileValidator
 		Tap                         *Tap
-		Proxy                       *Proxy
-		ProxyInit                   *ProxyInit
 		NodeSelector                map[string]string
 
 		DestinationResources,
@@ -74,6 +66,19 @@ type (
 
 	// ConfigJSONs is the JSON encoding of the Linkerd configuration
 	ConfigJSONs struct{ Global, Proxy, Install string }
+
+	// global contains the fields that are common for all charts
+	Global struct {
+		ClusterDomain            string
+		ImagePullPolicy          string
+		Namespace                string
+		ControllerComponentLabel string
+		ControllerNamespaceLabel string
+		CreatedByAnnotation      string
+		Proxy                    *Proxy
+		ProxyInit                *ProxyInit
+		Identity                 *Identity
+	}
 
 	// Proxy contains the fields to set the proxy sidecar container
 	Proxy struct {

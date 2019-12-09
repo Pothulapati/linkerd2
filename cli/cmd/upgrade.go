@@ -259,7 +259,7 @@ func (options *upgradeOptions) validateAndBuild(stage string, k kubernetes.Inter
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not build install configuration: %s", err)
 	}
-	values.Identity = identity
+	values.Global.Identity = identity
 
 	// if exist, re-use the proxy injector, profile validator and tap TLS secrets.
 	// otherwise, let Helm generate them by creating an empty charts.TLS struct here.

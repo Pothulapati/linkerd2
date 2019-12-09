@@ -43,14 +43,15 @@ PrometheusResources:
     Request: 300Mi
 
 # proxy configuration
-Proxy:
-  Resources:
-    CPU:
-      Limit: "1"
-      Request: 100m
-    Memory:
-      Limit: 250Mi
-      Request: 20Mi
+global:
+  Proxy:
+    Resources:
+      CPU:
+        Limit: "1"
+        Request: 100m
+      Memory:
+        Limit: 250Mi
+        Request: 20Mi
 
 # proxy injector configuration
 ProxyInjectorResources: *controller_resources

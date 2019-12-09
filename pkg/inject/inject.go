@@ -197,8 +197,10 @@ func (conf *ResourceConfig) GetPatch(injectProxy bool) ([]byte, error) {
 	}
 	values := &patch{
 		Values: charts.Values{
-			Namespace:     conf.configs.GetGlobal().GetLinkerdNamespace(),
-			ClusterDomain: clusterDomain,
+			Global: &charts.Global{
+				Namespace:     conf.configs.GetGlobal().GetLinkerdNamespace(),
+				ClusterDomain: clusterDomain,
+			},
 		},
 		Annotations: map[string]string{},
 		Labels:      map[string]string{},
@@ -229,7 +231,7 @@ func (conf *ResourceConfig) GetPatch(injectProxy bool) ([]byte, error) {
 	chart := &charts.Chart{
 		Name:      "patch",
 		Dir:       "patch",
-		Namespace: values.Namespace,
+		Namespace: values.Global.Namespace,
 		RawValues: rawValues,
 		Files:     files,
 	}
@@ -433,7 +435,7 @@ func (conf *ResourceConfig) complete(template *corev1.PodTemplateSpec) {
 
 // injectPodSpec adds linkerd sidecars to the provided PodSpec.
 func (conf *ResourceConfig) injectPodSpec(values *patch) {
-	values.Proxy = &charts.Proxy{
+	values.Global.Proxy = &charts.Proxy{
 		Component:              conf.pod.labels[k8s.ProxyDeploymentLabel],
 		EnableExternalProfiles: conf.enableExternalProfiles(),
 		DisableTap:             conf.tapDisabled(),
@@ -478,21 +480,21 @@ func (conf *ResourceConfig) injectPodSpec(values *patch) {
 	// enabled
 	if conf.pod.spec.Containers != nil && len(conf.pod.spec.Containers) > 0 {
 		if sc := conf.pod.spec.Containers[0].SecurityContext; sc != nil && sc.Capabilities != nil {
-			values.Proxy.Capabilities = &charts.Capabilities{
+			values.Global.Proxy.Capabilities = &charts.Capabilities{
 				Add:  []string{},
 				Drop: []string{},
 			}
 			for _, add := range sc.Capabilities.Add {
-				values.Proxy.Capabilities.Add = append(values.Proxy.Capabilities.Add, string(add))
+				values.Global.Proxy.Capabilities.Add = append(values.Global.Proxy.Capabilities.Add, string(add))
 			}
 			for _, drop := range sc.Capabilities.Drop {
-				values.Proxy.Capabilities.Drop = append(values.Proxy.Capabilities.Drop, string(drop))
+				values.Global.Proxy.Capabilities.Drop = append(values.Global.Proxy.Capabilities.Drop, string(drop))
 			}
 		}
 	}
 
 	if saVolumeMount != nil {
-		values.Proxy.SAMountPath = &charts.SAMountPath{
+		values.Global.Proxy.SAMountPath = &charts.SAMountPath{
 			Name:      saVolumeMount.Name,
 			MountPath: saVolumeMount.MountPath,
 			ReadOnly:  saVolumeMount.ReadOnly,
@@ -505,11 +507,11 @@ func (conf *ResourceConfig) injectPodSpec(values *patch) {
 
 	idctx := conf.identityContext()
 	if idctx == nil {
-		values.Proxy.DisableIdentity = true
+		values.Global.Proxy.DisableIdentity = true
 		return
 	}
 
-	values.Identity = &charts.Identity{
+	values.Global.Identity = &charts.Identity{
 		TrustAnchorsPEM: idctx.GetTrustAnchorsPem(),
 		TrustDomain:     idctx.GetTrustDomain(),
 	}
@@ -518,12 +520,12 @@ func (conf *ResourceConfig) injectPodSpec(values *patch) {
 
 	if trace := conf.trace(); trace != nil {
 		log.Infof("tracing enabled: remote service=%s, service account=%s", trace.CollectorSvcAddr, trace.CollectorSvcAccount)
-		values.Proxy.Trace = trace
+		values.Global.Proxy.Trace = trace
 	}
 }
 
 func (conf *ResourceConfig) injectProxyInit(values *patch) {
-	values.ProxyInit = &charts.ProxyInit{
+	values.Global.ProxyInit = &charts.ProxyInit{
 		Image: &charts.Image{
 			Name:       conf.proxyInitImage(),
 			PullPolicy: conf.proxyInitImagePullPolicy(),
@@ -541,8 +543,8 @@ func (conf *ResourceConfig) injectProxyInit(values *patch) {
 				Request: proxyInitResourceRequestMemory,
 			},
 		},
-		Capabilities: values.Proxy.Capabilities,
-		SAMountPath:  values.Proxy.SAMountPath,
+		Capabilities: values.Global.Proxy.Capabilities,
+		SAMountPath:  values.Global.Proxy.SAMountPath,
 	}
 
 	values.AddRootInitContainers = len(conf.pod.spec.InitContainers) == 0
