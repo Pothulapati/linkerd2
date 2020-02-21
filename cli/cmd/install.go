@@ -128,7 +128,6 @@ var (
 		"templates/serviceprofile-crd.yaml",
 		"templates/trafficsplit-crd.yaml",
 		"templates/prometheus-rbac.yaml",
-		"templates/grafana-rbac.yaml",
 		"templates/proxy-injector-rbac.yaml",
 		"templates/sp-validator-rbac.yaml",
 		"templates/tap-rbac.yaml",
@@ -145,7 +144,6 @@ var (
 		"templates/heartbeat.yaml",
 		"templates/web.yaml",
 		"templates/prometheus.yaml",
-		"templates/grafana.yaml",
 		"templates/proxy-injector.yaml",
 		"templates/sp-validator.yaml",
 		"templates/tap.yaml",
@@ -155,7 +153,7 @@ var (
 	// overridden during unit test
 	rawChartRootDir = "charts"
 
-	subCharts = []string{"tracing"}
+	subCharts = []string{"tracing", "grafana"}
 )
 
 // newInstallOptionsWithDefaults initializes install options with default

@@ -32,4 +32,6 @@ data:
   values: |-
     tracing:
   {{- toYaml $dupValues.tracing | trim | nindent 6}}
+    grafana:
+  {{- toYaml $dupValues.grafana | trim | nindent 6}}
 {{ end }}
