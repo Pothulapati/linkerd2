@@ -43,7 +43,9 @@ func TestMergeRaw(t *testing.T) {
 	t.Run("Test Ovewriting of Values struct", func(*testing.T) {
 
 		initialValues := charts.Values{
-			PrometheusImage:        "initial-prometheus",
+			Prometheus: charts.Prometheus{
+				"image": "initial-prometheus",
+			},
 			EnableH2Upgrade:        true,
 			ControllerReplicas:     1,
 			OmitWebhookSideEffects: false,
@@ -55,14 +57,17 @@ func TestMergeRaw(t *testing.T) {
 		// partially by using omitempty, but then we don't have relevant checks in helm templates as they would
 		// be nil when omitempty is present.
 		rawOverwriteValues := `
-prometheusImage: override-prometheus
+prometheus:
+  image: override-prometheus
 enableH2Upgrade: false
 controllerReplicas: 2
 omitWebhookSideEffects: true
 enablePodAntiAffinity: true`
 
 		expectedValues := charts.Values{
-			PrometheusImage:        "override-prometheus",
+			Prometheus: charts.Prometheus{
+				"image": "override-prometheus",
+			},
 			EnableH2Upgrade:        false,
 			ControllerReplicas:     2,
 			OmitWebhookSideEffects: true,

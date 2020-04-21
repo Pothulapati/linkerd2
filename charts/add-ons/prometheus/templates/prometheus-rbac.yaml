@@ -28,13 +28,13 @@ roleRef:
   name: linkerd-{{.Values.global.namespace}}-prometheus
 subjects:
 - kind: ServiceAccount
-  name: linkerd-prometheus
+  name: {{.Values.name}}
   namespace: {{.Values.global.namespace}}
 ---
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: linkerd-prometheus
+  name: {{.Values.name}}
   namespace: {{.Values.global.namespace}}
   labels:
     {{.Values.global.controllerComponentLabel}}: prometheus

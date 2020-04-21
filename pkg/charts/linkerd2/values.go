@@ -23,11 +23,9 @@ type (
 		ControllerImage             string            `json:"controllerImage"`
 		ControllerImageVersion      string            `json:"controllerImageVersion"`
 		WebImage                    string            `json:"webImage"`
-		PrometheusImage             string            `json:"prometheusImage"`
 		GrafanaImage                string            `json:"grafanaImage"`
 		ControllerReplicas          uint              `json:"controllerReplicas"`
 		ControllerLogLevel          string            `json:"controllerLogLevel"`
-		PrometheusLogLevel          string            `json:"prometheusLogLevel"`
 		ControllerUID               int64             `json:"controllerUID"`
 		EnableH2Upgrade             bool              `json:"enableH2Upgrade"`
 		EnablePodAntiAffinity       bool              `json:"enablePodAntiAffinity"`
@@ -60,7 +58,8 @@ type (
 		WebResources           *Resources `json:"webResources"`
 
 		// Addon Structures
-		Tracing Tracing `json:"tracing"`
+		Tracing    Tracing    `json:"tracing"`
+		Prometheus Prometheus `json:"prometheus"`
 	}
 
 	// Global values common across all charts
@@ -81,6 +80,7 @@ type (
 		ControlPlaneTracing      bool   `json:"controlPlaneTracing"`
 		IdentityTrustAnchorsPEM  string `json:"identityTrustAnchorsPEM"`
 		IdentityTrustDomain      string `json:"identityTrustDomain"`
+		PrometheusUrl            string `json:"prometheusUrl"`
 
 		Proxy     *Proxy     `json:"proxy"`
 		ProxyInit *ProxyInit `json:"proxyInit"`

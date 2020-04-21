@@ -18,11 +18,9 @@ func TestNewValues(t *testing.T) {
 		ControllerImage:             "gcr.io/linkerd-io/controller",
 		ControllerImageVersion:      testVersion,
 		WebImage:                    "gcr.io/linkerd-io/web",
-		PrometheusImage:             "prom/prometheus:v2.15.2",
 		GrafanaImage:                "gcr.io/linkerd-io/grafana",
 		ControllerReplicas:          1,
 		ControllerLogLevel:          "info",
-		PrometheusLogLevel:          "info",
 		ControllerUID:               2103,
 		EnableH2Upgrade:             true,
 		EnablePodAntiAffinity:       false,
@@ -127,6 +125,10 @@ func TestNewValues(t *testing.T) {
 		SMIMetrics: &SMIMetrics{
 			Image: "deislabs/smi-metrics:v0.2.1",
 			TLS:   &TLS{},
+		},
+		Prometheus: Prometheus{
+			"image":    "prom/prometheus:v2.15.2",
+			"logLevel": "info",
 		},
 	}
 

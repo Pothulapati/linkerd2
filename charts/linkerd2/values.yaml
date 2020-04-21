@@ -7,6 +7,10 @@ global:
   clusterDomain: &cluster_domain cluster.local
   imagePullPolicy: &image_pull_policy IfNotPresent
 
+  # url of the prometheus instance
+  # configured to power Dashboard and CLI using external prometheus
+  prometheusUrl: 
+
  # control plane trace configuration
   controlPlaneTracing: false
 
@@ -129,10 +133,6 @@ grafanaImage: gcr.io/linkerd-io/grafana
 disableHeartBeat: false
 heartbeatSchedule: "0 0 * * *"
 
-# prometheus configuration
-prometheusImage: prom/prometheus:v2.15.2
-prometheusLogLevel: *controller_log_level
-
 # proxy injector configuration
 proxyInjector:
   # if empty, Helm will auto-generate these fields
@@ -188,3 +188,11 @@ tracing:
     name: linkerd-jaeger
     image: jaegertracing/all-in-one:1.17.1
     resources:
+
+prometheus:
+  enabled: true
+  name: linkerd-prometheus
+  image: prom/prometheus:v2.15.2
+  logLevel: *controller_log_level
+  remoteWrite:
+  resources:

@@ -56,10 +56,8 @@ func TestRender(t *testing.T) {
 		ControllerImage:             "ControllerImage",
 		ControllerImageVersion:      "ControllerImageVersion",
 		WebImage:                    "WebImage",
-		PrometheusImage:             "PrometheusImage",
 		GrafanaImage:                "GrafanaImage",
 		ControllerLogLevel:          "ControllerLogLevel",
-		PrometheusLogLevel:          "PrometheusLogLevel",
 		ControllerUID:               2103,
 		EnableH2Upgrade:             true,
 		WebhookFailurePolicy:        "WebhookFailurePolicy",
@@ -131,6 +129,10 @@ func TestRender(t *testing.T) {
 		},
 		Tracing: map[string]interface{}{
 			"enabled": false,
+		},
+		Prometheus: map[string]interface{}{
+			"image":    "PrometheusImage",
+			"logLevel": "PrometheusLogLevel",
 		},
 	}
 
@@ -340,8 +342,8 @@ func TestValidate(t *testing.T) {
 			t.Fatalf("Unexpected error occurred %s", err)
 		}
 
-		if actual.PrometheusLogLevel != expected {
-			t.Fatalf("Expected error string\"%s\", got \"%s\"", expected, actual.PrometheusLogLevel)
+		if actual.Prometheus["logLevel"].(string) != expected {
+			t.Fatalf("Expected error string\"%s\", got \"%s\"", expected, actual.Prometheus["logLevel"].(string))
 		}
 	})
 

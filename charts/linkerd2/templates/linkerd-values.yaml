@@ -3,7 +3,17 @@
   As fields like global, etc are added by helm and we would not want them in the data, second level fields should be used 
   instead of directly specifying the add-on field.
 */ -}}
-{{ if or (.Values.tracing.enabled) -}}
+{{- $dupValues := .Values -}}
+{{- range $key, $value := $dupValues -}}
+  {{- if kindIs "map" $value -}}
+    {{- if and (hasKey $value "global") (ne $key "configs" ) -}}
+      {{- $dupValues := set $dupValues $key (unset $value "global") -}}
+    {{- end -}}
+    {{- if hasKey $value "partials" -}}
+      {{- $dupValues := set $dupValues $key (unset $value "partials") -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
 ---
 ###
 ### linkerd values
@@ -20,10 +30,13 @@ metadata:
     {{.Values.global.createdByAnnotation}}: {{default (printf "linkerd/helm %s" .Values.global.linkerdVersion) .Values.global.cliVersion}}
 data:
   values: |-
+    global:
+      prometheusUrl: {{.Values.global.prometheusUrl}}
+    {{- if (.Values.tracing.enabled) }}
     tracing:
-      enabled: {{.Values.tracing.enabled}}
-      collector:
-  {{- toYaml .Values.tracing.collector | trim | nindent 8}}
-      jaeger:
-  {{- toYaml .Values.tracing.jaeger | trim | nindent 8}}
-{{ end -}}
+    {{- toYaml .Values.tracing | trim | nindent 6}}
+    {{- end -}}
+    {{- if (.Values.prometheus.enabled) }}
+    prometheus:
+    {{- toYaml .Values.prometheus | trim | nindent 6}}
+    {{- end}}
