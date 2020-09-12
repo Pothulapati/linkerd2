@@ -203,6 +203,27 @@ func TestInstallCNIPlugin(t *testing.T) {
 	}
 }
 
+func TestCalicoInstall(t *testing.T) {
+	if !TestHelper.Calico() {
+		return
+	}
+
+	// Install calico CNI plug-in from the official manifests
+	// Calico operator and custom resource definitions.
+	out, err := TestHelper.Kubectl("", []string{"apply", "-f", "https://docs.projectcalico.org/manifests/tigera-operator.yaml"}...)
+	if err != nil {
+		testutil.AnnotatedFatalf(t, "'kubectl apply' command failed",
+			"kubectl apply command failed\n%s", out)
+	}
+
+	// creating the necessary custom resource
+	out, err = TestHelper.Kubectl("", []string{"apply", "-f", "https://docs.projectcalico.org/manifests/custom-resources.yaml"}...)
+	if err != nil {
+		testutil.AnnotatedFatalf(t, "'kubectl apply' command failed",
+			"kubectl apply command failed\n%s", out)
+	}
+}
+
 func TestInstallOrUpgradeCli(t *testing.T) {
 	if TestHelper.GetHelmReleaseName() != "" {
 		return
